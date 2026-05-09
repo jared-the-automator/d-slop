@@ -1,6 +1,6 @@
 export const RULES_URL =
   (import.meta.env.VITE_RULES_URL as string | undefined) ??
-  'https://raw.githubusercontent.com/biggerfisch/d-slop/main/rules/rules.json';
+  'https://raw.githubusercontent.com/jared-the-automator/d-slop/main/rules/rules.json';
 
 export const RULES_FETCH_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 export const RULES_CACHE_KEY = 'cachedRules';
