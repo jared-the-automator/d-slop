@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getExtensionState, setExtensionState, getFlagCount } from '../../lib/storage';
+import { getExtensionState, setExtensionState } from '../../lib/storage';
 import type { DisplayMode, ExtensionState } from '../../lib/rules-engine/types';
 
 const MODES: DisplayMode[] = ['highlight', 'collapse', 'hidden'];
@@ -10,7 +10,12 @@ export default function App() {
 
   useEffect(() => {
     getExtensionState().then(setState);
-    getFlagCount().then(setFlagCountLocal);
+    browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+      if (!tab?.id) return;
+      browser.tabs.sendMessage(tab.id, { type: 'GET_FLAG_COUNT' })
+        .then((res: { count: number }) => setFlagCountLocal(res?.count ?? 0))
+        .catch(() => setFlagCountLocal(0));
+    });
   }, []);
 
   async function toggleEnabled() {
@@ -69,6 +74,9 @@ export default function App() {
             {m.charAt(0).toUpperCase() + m.slice(1)}
           </label>
         ))}
+        <p style={{ fontSize: '11px', color: '#888', margin: '4px 0 0 0' }}>
+          Mode changes apply on the next page load.
+        </p>
       </fieldset>
 
       <div style={{ fontSize: 11, color: '#999', textAlign: 'right' }}>

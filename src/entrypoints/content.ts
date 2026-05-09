@@ -57,7 +57,8 @@ function applyCollapse(el: Element): void {
   summary.textContent = 'likely AI-generated — click to reveal';
   summary.style.cssText = 'cursor:pointer;color:#999;font-size:0.85em;padding:4px 0';
 
-  el.parentNode?.insertBefore(wrapper, el);
+  if (!el.parentNode) return;
+  el.parentNode.insertBefore(wrapper, el);
   wrapper.appendChild(summary);
   wrapper.appendChild(el);
 }
@@ -75,23 +76,37 @@ function applyMode(el: Element, textScore: TextScore, mode: DisplayMode): void {
 export default defineContentScript({
   matches: ['<all_urls>'],
   async main() {
-    const [state, rules] = await Promise.all([getExtensionState(), getCachedRules()]);
+    let tabFlagCount = 0;
 
-    if (!state.enabled) return;
+    async function run() {
+      const [state, rules] = await Promise.all([getExtensionState(), getCachedRules()]);
 
-    const blocks = getTextBlocks();
-    let flagCount = 0;
+      if (!state.enabled) return;
 
-    for (const block of blocks) {
-      block.setAttribute(SCORED_ATTR, '1');
-      const text = (block as HTMLElement).innerText ?? block.textContent ?? '';
-      const textScore = score(text, rules);
-      if (textScore.flagged) {
-        applyMode(block, textScore, state.mode);
-        flagCount++;
+      const blocks = getTextBlocks();
+      let flagCount = 0;
+
+      for (const block of blocks) {
+        block.setAttribute(SCORED_ATTR, '1');
+        const text = (block as HTMLElement).innerText ?? block.textContent ?? '';
+        const textScore = score(text, rules);
+        if (textScore.flagged) {
+          applyMode(block, textScore, state.mode);
+          flagCount++;
+        }
       }
+
+      await setFlagCount(flagCount);
+      tabFlagCount = flagCount;
     }
 
-    await setFlagCount(flagCount);
+    await run();
+
+    browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+      if (msg?.type === 'GET_FLAG_COUNT') {
+        sendResponse({ count: tabFlagCount });
+        return true;
+      }
+    });
   },
 });

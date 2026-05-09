@@ -32,7 +32,7 @@ export function sentenceUniformityScore(text: string, uniformityThreshold: numbe
 export function punctuationDensityScore(text: string, densityThreshold: number): number {
   const emDashes = (text.match(/—/g) ?? []).length;
   const semicolons = (text.match(/;/g) ?? []).length;
-  const words = text.trim().split(/\s+/).length;
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
   if (words === 0) return 0;
   const density = (emDashes + semicolons) / words;
   return Math.min(1, density / densityThreshold);

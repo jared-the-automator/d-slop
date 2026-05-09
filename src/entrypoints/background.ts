@@ -8,6 +8,14 @@ async function fetchAndCacheRules(): Promise<void> {
     if (!res.ok) return;
     const rules: Rules = await res.json();
     if (!rules || typeof rules.version !== 'number' || !rules.signals || typeof rules.threshold !== 'number') return;
+    const s = rules.signals;
+    if (
+      !Array.isArray(s.phraseMatch?.phrases) ||
+      typeof s.burstiness?.uniformityThreshold !== 'number' ||
+      typeof s.punctuationDensity?.densityThreshold !== 'number' ||
+      typeof s.listUniformity?.varianceThreshold !== 'number' ||
+      !Array.isArray(s.conclusionMarkers?.markers)
+    ) return;
     await setCachedRules(rules);
     await chrome.storage.local.set({ [RULES_LAST_FETCHED_KEY]: Date.now() });
   } catch {
