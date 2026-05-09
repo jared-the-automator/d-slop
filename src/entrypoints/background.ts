@@ -7,6 +7,7 @@ async function fetchAndCacheRules(): Promise<void> {
     const res = await fetch(RULES_URL);
     if (!res.ok) return;
     const rules: Rules = await res.json();
+    if (!rules || typeof rules.version !== 'number' || !rules.signals || typeof rules.threshold !== 'number') return;
     await setCachedRules(rules);
     await chrome.storage.local.set({ [RULES_LAST_FETCHED_KEY]: Date.now() });
   } catch {
