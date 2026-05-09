@@ -5,7 +5,7 @@ export interface SignalConfig {
 }
 
 export interface PhraseMatchConfig extends SignalConfig {
-  phrases: string[];
+  readonly phrases: readonly string[];
 }
 
 export interface BurstinessConfig extends SignalConfig {
@@ -21,7 +21,7 @@ export interface ListUniformityConfig extends SignalConfig {
 }
 
 export interface ConclusionConfig extends SignalConfig {
-  markers: string[];
+  readonly markers: readonly string[];
 }
 
 export interface Rules {

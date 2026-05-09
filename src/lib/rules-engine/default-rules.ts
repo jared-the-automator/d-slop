@@ -40,7 +40,6 @@ export const DEFAULT_RULES: Rules = {
         "in today's fast-paced",
         'the fact of the matter',
         'rest assured',
-        'rest assured that',
         'it goes without saying',
         'needless to say',
         'without further ado',
