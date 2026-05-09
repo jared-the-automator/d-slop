@@ -8,20 +8,20 @@ function stdDev(values: number[]): number {
 export function phraseMatchScore(text: string, phrases: readonly string[]): number {
   if (phrases.length === 0) return 0;
   const lower = text.toLowerCase();
-  const matches = phrases.filter(p => lower.includes(p)).length;
+  const matches = phrases.filter(p => lower.includes(p.toLowerCase())).length;
   return Math.min(1, matches / 3);
 }
 
 export function conclusionMarkerScore(text: string, markers: readonly string[]): number {
   const lower = text.toLowerCase();
-  return markers.some(m => lower.includes(m)) ? 1 : 0;
+  return markers.some(m => lower.includes(m.toLowerCase())) ? 1 : 0;
 }
 
-export function burstinessScore(text: string, uniformityThreshold: number): number {
+export function sentenceUniformityScore(text: string, uniformityThreshold: number): number {
   const sentences = text
     .split(/[.!?]+/)
     .map(s => s.trim().split(/\s+/).filter(w => w.length > 0).length)
-    .filter(len => len > 3);
+    .filter(len => len > 0);
   if (sentences.length < 3) return 0;
   const mean = sentences.reduce((a, b) => a + b, 0) / sentences.length;
   if (mean === 0) return 0;
@@ -41,7 +41,7 @@ export function punctuationDensityScore(text: string, densityThreshold: number):
 export function listUniformityScore(text: string, varianceThreshold: number): number {
   const lines = text.split('\n');
   const items = lines
-    .filter(l => /^\s*[-•*]|\s*\d+[.)]\s/.test(l))
+    .filter(l => /^\s*[-•*]|^\s*\d+[.)]\s/.test(l))
     .map(l => l.replace(/^\s*[-•*\d.)\s]+/, '').trim())
     .filter(l => l.length > 0);
   if (items.length < 3) return 0;
