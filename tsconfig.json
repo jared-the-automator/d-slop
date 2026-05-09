@@ -1,0 +1,8 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "tests", "wxt.config.ts", "vitest.config.ts"]
+}
