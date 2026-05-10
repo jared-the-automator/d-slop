@@ -28,36 +28,16 @@ async function renderIcon(size) {
     ctx.fillStyle = '#540D6E';
     ctx.fill();
 
-    // Mint text-line rectangles
+    // Backwards (mirrored) "S" in mint
+    ctx.save();
+    ctx.translate(s, 0);
+    ctx.scale(-1, 1);
     ctx.fillStyle = '#9FFCDF';
-    ctx.globalAlpha = 0.75;
-    const lx = s * 3 / 16;
-    const lh = s * 2 / 16;
-    const lr = lh / 2;
-
-    function roundRect(x, y, w, h, radius) {
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + w - radius, y); ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-      ctx.lineTo(x + w, y + h - radius); ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-      ctx.lineTo(x + radius, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-      ctx.lineTo(x, y + radius); ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    roundRect(lx, s * 4.5 / 16, s * 10 / 16, lh, lr); // top line
-    roundRect(lx, s * 9.5 / 16, s * 7 / 16,  lh, lr); // bottom line (shorter)
-
-    // Diagonal slash
-    ctx.globalAlpha = 1.0;
-    ctx.strokeStyle = '#9FFCDF';
-    ctx.lineWidth = s * 1.8 / 16;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(s * 2.5 / 16, s * 13.5 / 16);
-    ctx.lineTo(s * 13.5 / 16, s * 2.5 / 16);
-    ctx.stroke();
+    ctx.font = `bold ${Math.round(s * 0.68)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('S', s / 2, s / 2);
+    ctx.restore();
 
     return canvas.toDataURL('image/png');
   }, size);
