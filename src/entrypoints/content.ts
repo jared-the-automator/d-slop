@@ -1,4 +1,4 @@
-import { getExtensionState, getCachedRules, setFlagCount } from '../lib/storage';
+import { getExtensionState, getCachedRules, setFlagCount, getUserThreshold } from '../lib/storage';
 import { score } from '../lib/rules-engine/scorer';
 import type { DisplayMode, TextScore } from '../lib/rules-engine/types';
 
@@ -63,14 +63,56 @@ function applyCollapse(el: Element): void {
   wrapper.appendChild(el);
 }
 
-function applyHidden(el: Element): void {
-  (el as HTMLElement).style.display = 'none';
+function applyFullPageOverlay(flagCount: number): void {
+  if (document.getElementById('dslop-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'dslop-overlay';
+  overlay.style.cssText = [
+    'position:fixed',
+    'inset:0',
+    'background:#540D6E',
+    'z-index:2147483647',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'font-family:monospace',
+  ].join(';');
+
+  const box = document.createElement('div');
+  box.style.cssText = 'color:#9FFCDF;text-align:center;max-width:380px;padding:2em';
+
+  const title = document.createElement('p');
+  title.style.cssText = 'font-size:1.3em;margin:0 0 0.4em;font-weight:bold';
+  title.textContent = 'AI-generated content detected';
+
+  const sub = document.createElement('p');
+  sub.style.cssText = 'font-size:0.85em;margin:0 0 1.5em;opacity:0.75';
+  sub.textContent = `${flagCount} block${flagCount !== 1 ? 's' : ''} flagged on this page`;
+
+  const btn = document.createElement('button');
+  btn.textContent = 'Show anyway';
+  btn.style.cssText = [
+    'background:#9FFCDF',
+    'color:#540D6E',
+    'border:none',
+    'padding:0.5em 1.4em',
+    'font:bold 0.95em monospace',
+    'cursor:pointer',
+    'border-radius:4px',
+  ].join(';');
+  btn.addEventListener('click', () => overlay.remove());
+
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(btn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
 }
 
 function applyMode(el: Element, textScore: TextScore, mode: DisplayMode): void {
   if (mode === 'highlight') applyHighlight(el, textScore);
   else if (mode === 'collapse') applyCollapse(el);
-  else applyHidden(el);
 }
 
 export default defineContentScript({
@@ -79,7 +121,12 @@ export default defineContentScript({
     let tabFlagCount = 0;
 
     async function run() {
-      const [state, rules] = await Promise.all([getExtensionState(), getCachedRules()]);
+      const [state, rules, userThreshold] = await Promise.all([
+        getExtensionState(),
+        getCachedRules(),
+        getUserThreshold(),
+      ]);
+      const effectiveRules = { ...rules, threshold: userThreshold };
 
       if (!state.enabled) return;
 
@@ -89,15 +136,19 @@ export default defineContentScript({
       for (const block of blocks) {
         block.setAttribute(SCORED_ATTR, '1');
         const text = (block as HTMLElement).innerText ?? block.textContent ?? '';
-        const textScore = score(text, rules);
+        const textScore = score(text, effectiveRules);
         if (textScore.flagged) {
-          applyMode(block, textScore, state.mode);
+          if (state.mode !== 'hidden') applyMode(block, textScore, state.mode);
           flagCount++;
         }
       }
 
       await setFlagCount(flagCount);
       tabFlagCount = flagCount;
+
+      if (state.mode === 'hidden' && flagCount > 0) {
+        applyFullPageOverlay(flagCount);
+      }
     }
 
     await run();

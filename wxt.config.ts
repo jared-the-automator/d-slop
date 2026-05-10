@@ -9,5 +9,18 @@ export default defineConfig({
     version: '0.1.0',
     permissions: ['storage', 'tabs'],
     host_permissions: ['https://raw.githubusercontent.com/*'],
+    icons: {
+      16: 'icon-16.svg',
+      48: 'icon-48.svg',
+      128: 'icon-128.svg',
+    },
+    action: {
+      default_title: 'D-slop',
+      default_popup: 'popup.html',
+      default_icon: {
+        16: 'icon-16.svg',
+        48: 'icon-48.svg',
+      },
+    },
   },
 });

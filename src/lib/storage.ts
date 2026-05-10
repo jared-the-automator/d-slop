@@ -5,6 +5,8 @@ import {
   ENABLED_KEY,
   MODE_KEY,
   FLAG_COUNT_KEY,
+  USER_THRESHOLD_KEY,
+  DEFAULT_THRESHOLD,
 } from './config';
 
 export async function getCachedRules(): Promise<Rules> {
@@ -35,4 +37,13 @@ export async function getFlagCount(): Promise<number> {
 
 export async function setFlagCount(count: number): Promise<void> {
   await chrome.storage.local.set({ [FLAG_COUNT_KEY]: count });
+}
+
+export async function getUserThreshold(): Promise<number> {
+  const result = await chrome.storage.local.get(USER_THRESHOLD_KEY);
+  return (result[USER_THRESHOLD_KEY] as number | undefined) ?? DEFAULT_THRESHOLD;
+}
+
+export async function setUserThreshold(value: number): Promise<void> {
+  await chrome.storage.local.set({ [USER_THRESHOLD_KEY]: value });
 }

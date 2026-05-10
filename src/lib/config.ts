@@ -8,3 +8,5 @@ export const RULES_LAST_FETCHED_KEY = 'rulesLastFetched';
 export const ENABLED_KEY = 'enabled';
 export const MODE_KEY = 'mode';
 export const FLAG_COUNT_KEY = 'flagCount';
+export const USER_THRESHOLD_KEY = 'userThreshold';
+export const DEFAULT_THRESHOLD = 0.20;
