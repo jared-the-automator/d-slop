@@ -7,70 +7,60 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
+await page.setContent('<html><body></body></html>');
 
 async function renderIcon(size) {
-  const r = size * 3 / 16;
-  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:transparent">
-<canvas id="c" width="${size}" height="${size}"></canvas>
-<script>
-const c = document.getElementById('c');
-const ctx = c.getContext('2d');
-const s = ${size};
+  const dataUrl = await page.evaluate((s) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = s;
+    canvas.height = s;
+    const ctx = canvas.getContext('2d');
 
-// Purple background with rounded corners
-ctx.beginPath();
-const r = ${r};
-ctx.moveTo(r, 0);
-ctx.lineTo(s-r, 0); ctx.quadraticCurveTo(s,0,s,r);
-ctx.lineTo(s, s-r); ctx.quadraticCurveTo(s,s,s-r,s);
-ctx.lineTo(r, s); ctx.quadraticCurveTo(0,s,0,s-r);
-ctx.lineTo(0, r); ctx.quadraticCurveTo(0,0,r,0);
-ctx.closePath();
-ctx.fillStyle = '#540D6E';
-ctx.fill();
+    // Purple rounded-rect background
+    const r = s * 3 / 16;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(s - r, 0); ctx.quadraticCurveTo(s, 0, s, r);
+    ctx.lineTo(s, s - r); ctx.quadraticCurveTo(s, s, s - r, s);
+    ctx.lineTo(r, s);     ctx.quadraticCurveTo(0, s, 0, s - r);
+    ctx.lineTo(0, r);     ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.fillStyle = '#540D6E';
+    ctx.fill();
 
-// Two mint text-line rects
-ctx.globalAlpha = 0.75;
-ctx.fillStyle = '#9FFCDF';
-// Line 1
-const rx = s*3/16, ry1 = s*4.5/16, rw = s*10/16, rh = s*2/16, rr = rh/2;
-ctx.beginPath();
-ctx.moveTo(rx+rr, ry1);
-ctx.lineTo(rx+rw-rr, ry1); ctx.quadraticCurveTo(rx+rw,ry1,rx+rw,ry1+rr);
-ctx.lineTo(rx+rw, ry1+rh-rr); ctx.quadraticCurveTo(rx+rw,ry1+rh,rx+rw-rr,ry1+rh);
-ctx.lineTo(rx+rr, ry1+rh); ctx.quadraticCurveTo(rx,ry1+rh,rx,ry1+rh-rr);
-ctx.lineTo(rx, ry1+rr); ctx.quadraticCurveTo(rx,ry1,rx+rr,ry1);
-ctx.closePath();
-ctx.fill();
-// Line 2
-const ry2 = s*9.5/16, rw2 = s*7/16;
-ctx.beginPath();
-ctx.moveTo(rx+rr, ry2);
-ctx.lineTo(rx+rw2-rr, ry2); ctx.quadraticCurveTo(rx+rw2,ry2,rx+rw2,ry2+rr);
-ctx.lineTo(rx+rw2, ry2+rh-rr); ctx.quadraticCurveTo(rx+rw2,ry2+rh,rx+rw2-rr,ry2+rh);
-ctx.lineTo(rx+rr, ry2+rh); ctx.quadraticCurveTo(rx,ry2+rh,rx,ry2+rh-rr);
-ctx.lineTo(rx, ry2+rr); ctx.quadraticCurveTo(rx,ry2,rx+rr,ry2);
-ctx.closePath();
-ctx.fill();
+    // Mint text-line rectangles
+    ctx.fillStyle = '#9FFCDF';
+    ctx.globalAlpha = 0.75;
+    const lx = s * 3 / 16;
+    const lh = s * 2 / 16;
+    const lr = lh / 2;
 
-// Diagonal slash
-ctx.globalAlpha = 1.0;
-ctx.strokeStyle = '#9FFCDF';
-ctx.lineWidth = s * 1.8 / 16;
-ctx.lineCap = 'round';
-ctx.beginPath();
-ctx.moveTo(s*2.5/16, s*13.5/16);
-ctx.lineTo(s*13.5/16, s*2.5/16);
-ctx.stroke();
-</script></body></html>`;
+    function roundRect(x, y, w, h, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + w - radius, y); ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+      ctx.lineTo(x + w, y + h - radius); ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+      ctx.lineTo(x + radius, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+      ctx.lineTo(x, y + radius); ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.fill();
+    }
 
-  await page.setContent(html);
-  await page.waitForFunction(() => !!document.getElementById('c'));
-  await page.setViewportSize({ width: size, height: size });
+    roundRect(lx, s * 4.5 / 16, s * 10 / 16, lh, lr); // top line
+    roundRect(lx, s * 9.5 / 16, s * 7 / 16,  lh, lr); // bottom line (shorter)
 
-  const dataUrl = await page.evaluate(() => {
-    return document.getElementById('c').toDataURL('image/png');
-  });
+    // Diagonal slash
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = '#9FFCDF';
+    ctx.lineWidth = s * 1.8 / 16;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(s * 2.5 / 16, s * 13.5 / 16);
+    ctx.lineTo(s * 13.5 / 16, s * 2.5 / 16);
+    ctx.stroke();
+
+    return canvas.toDataURL('image/png');
+  }, size);
 
   const base64 = dataUrl.replace('data:image/png;base64,', '');
   const buffer = Buffer.from(base64, 'base64');
