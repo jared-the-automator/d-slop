@@ -21,7 +21,7 @@ function getTextBlocks(): Element[] {
     .filter(el => !el.hasAttribute(SCORED_ATTR))
     .filter(el => {
       const text = (el as HTMLElement).innerText ?? el.textContent ?? '';
-      return text.trim().split(/\s+/).filter(w => w.length > 0).length >= 50;
+      return text.trim().split(/\s+/).filter(w => w.length > 0).length >= 25;
     });
 }
 

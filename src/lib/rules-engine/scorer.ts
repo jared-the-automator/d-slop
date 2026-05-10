@@ -7,7 +7,7 @@ import {
   conclusionMarkerScore,
 } from './signals';
 
-const MIN_WORD_COUNT = 50;
+const MIN_WORD_COUNT = 25;
 
 export function score(text: string, rules: Rules): TextScore {
   const wordCount = text.trim().split(/\s+/).filter(w => w.length > 0).length;

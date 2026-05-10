@@ -9,7 +9,7 @@ export function phraseMatchScore(text: string, phrases: readonly string[]): numb
   if (phrases.length === 0) return 0;
   const lower = text.toLowerCase();
   const matches = phrases.filter(p => lower.includes(p.toLowerCase())).length;
-  return Math.min(1, matches / 3);
+  return Math.min(1, matches / 2);
 }
 
 export function conclusionMarkerScore(text: string, markers: readonly string[]): number {

@@ -1,8 +1,8 @@
 import type { Rules } from './types';
 
 export const DEFAULT_RULES: Rules = {
-  version: 1,
-  threshold: 0.35,
+  version: 2,
+  threshold: 0.20,
   signals: {
     phraseMatch: {
       weight: 0.40,
@@ -15,9 +15,13 @@ export const DEFAULT_RULES: Rules = {
         'i cannot and will not',
         "it's important to note",
         'it is important to note',
+        "it's important to understand",
+        'it is important to understand',
         'dive deep',
         "let's explore",
         'let us explore',
+        "let's take a look",
+        'let us take a look',
         'comprehensive guide',
         'navigating the',
         'in the realm of',
@@ -47,6 +51,14 @@ export const DEFAULT_RULES: Rules = {
         'looking ahead',
         'actionable insights',
         'best practices',
+        'when it comes to',
+        'plays a crucial role',
+        'play a crucial role',
+        'moving forward',
+        'in this article',
+        'in this guide',
+        'seamlessly',
+        'state-of-the-art',
       ],
     },
     burstiness: {

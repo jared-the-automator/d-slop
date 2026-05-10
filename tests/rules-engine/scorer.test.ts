@@ -40,14 +40,14 @@ At the end of the day, actionable insights and key takeaways drive sustainable g
 `.repeat(2);
 
 describe('score', () => {
-  it('returns score 0 and flagged false for text under 50 words', () => {
+  it('returns score 0 and flagged false for text under 25 words', () => {
     const result = score('This is a short text.', TEST_RULES);
     expect(result.score).toBe(0);
     expect(result.flagged).toBe(false);
     expect(result.signals).toHaveLength(0);
   });
 
-  it('returns all five signal names for text >= 50 words', () => {
+  it('returns all five signal names for text >= 25 words', () => {
     const result = score(HUMAN_TEXT, TEST_RULES);
     const names = result.signals.map(s => s.name);
     expect(names).toContain('phraseMatch');
