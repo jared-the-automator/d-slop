@@ -90,6 +90,11 @@ function applyFullPageOverlay(flagCount: number): void {
   sub.style.cssText = 'font-size:0.85em;margin:0 0 1.5em;opacity:0.75';
   sub.textContent = `${flagCount} block${flagCount !== 1 ? 's' : ''} flagged on this page`;
 
+  const countdown = document.createElement('p');
+  let remaining = 3;
+  countdown.style.cssText = 'font-size:0.8em;margin:0 0 1em;opacity:0.6';
+  countdown.textContent = `Returning in ${remaining}s…`;
+
   const btn = document.createElement('button');
   btn.textContent = 'Show anyway';
   btn.style.cssText = [
@@ -101,10 +106,26 @@ function applyFullPageOverlay(flagCount: number): void {
     'cursor:pointer',
     'border-radius:4px',
   ].join(';');
-  btn.addEventListener('click', () => overlay.remove());
+
+  const tick = setInterval(() => {
+    remaining -= 1;
+    countdown.textContent = `Returning in ${remaining}s…`;
+  }, 1000);
+
+  const goBack = setTimeout(() => {
+    clearInterval(tick);
+    history.back();
+  }, 3000);
+
+  btn.addEventListener('click', () => {
+    clearInterval(tick);
+    clearTimeout(goBack);
+    overlay.remove();
+  });
 
   box.appendChild(title);
   box.appendChild(sub);
+  box.appendChild(countdown);
   box.appendChild(btn);
   overlay.appendChild(box);
   document.body.appendChild(overlay);

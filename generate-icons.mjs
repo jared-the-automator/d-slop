@@ -28,18 +28,7 @@ async function renderIcon(size) {
     ctx.fillStyle = '#540D6E';
     ctx.fill();
 
-    // Backwards (mirrored) "S" in mint
-    ctx.save();
-    ctx.translate(s, 0);
-    ctx.scale(-1, 1);
-    ctx.fillStyle = '#9FFCDF';
-    ctx.font = `bold ${Math.round(s * 0.68)}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('S', s / 2, s / 2);
-    ctx.restore();
-
-    // Diagonal strikethrough
+    // Diagonal strikethrough (drawn first, S renders on top)
     ctx.strokeStyle = '#9FFCDF';
     ctx.lineWidth = s * 1.8 / 16;
     ctx.lineCap = 'round';
@@ -47,6 +36,17 @@ async function renderIcon(size) {
     ctx.moveTo(s * 2.5 / 16, s * 13.5 / 16);
     ctx.lineTo(s * 13.5 / 16, s * 2.5 / 16);
     ctx.stroke();
+
+    // Backwards (mirrored) "S" in mint — drawn on top of slash
+    ctx.save();
+    ctx.translate(s, 0);
+    ctx.scale(-1, 1);
+    ctx.fillStyle = '#9FFCDF';
+    ctx.font = `bold ${Math.round(s * 0.85)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('S', s / 2, s / 2);
+    ctx.restore();
 
     return canvas.toDataURL('image/png');
   }, size);
