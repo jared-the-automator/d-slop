@@ -39,6 +39,15 @@ async function renderIcon(size) {
     ctx.fillText('S', s / 2, s / 2);
     ctx.restore();
 
+    // Diagonal strikethrough
+    ctx.strokeStyle = '#9FFCDF';
+    ctx.lineWidth = s * 1.8 / 16;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(s * 2.5 / 16, s * 13.5 / 16);
+    ctx.lineTo(s * 13.5 / 16, s * 2.5 / 16);
+    ctx.stroke();
+
     return canvas.toDataURL('image/png');
   }, size);
 
