@@ -10,16 +10,16 @@ export default defineConfig({
     permissions: ['storage', 'tabs'],
     host_permissions: ['https://raw.githubusercontent.com/*'],
     icons: {
-      16: 'icon-16.svg',
-      48: 'icon-48.svg',
-      128: 'icon-128.svg',
+      16: 'icon-16.png',
+      48: 'icon-48.png',
+      128: 'icon-128.png',
     },
     action: {
       default_title: 'D-slop',
       default_popup: 'popup.html',
       default_icon: {
-        16: 'icon-16.svg',
-        48: 'icon-48.svg',
+        16: 'icon-16.png',
+        48: 'icon-48.png',
       },
     },
   },
