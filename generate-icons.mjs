@@ -38,14 +38,17 @@ async function renderIcon(size) {
     ctx.stroke();
 
     // Backwards (mirrored) "S" in mint — drawn on top of slash
+    // Use actualBoundingBox metrics to visually center the glyph
     ctx.save();
     ctx.translate(s, 0);
     ctx.scale(-1, 1);
     ctx.fillStyle = '#9FFCDF';
-    ctx.font = `bold ${Math.round(s * 0.85)}px serif`;
+    ctx.font = `900 ${Math.round(s * 0.92)}px serif`;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('S', s / 2, s / 2);
+    ctx.textBaseline = 'alphabetic';
+    const m = ctx.measureText('S');
+    const y = s / 2 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+    ctx.fillText('S', s / 2, y);
     ctx.restore();
 
     return canvas.toDataURL('image/png');
