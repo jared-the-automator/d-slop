@@ -30,7 +30,7 @@ async function renderIcon(size) {
 
     // Diagonal strikethrough (drawn first, S renders on top)
     ctx.strokeStyle = '#9FFCDF';
-    ctx.lineWidth = s * 0.9 / 16;
+    ctx.lineWidth = s * 1.35 / 16;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(s * 2.5 / 16, s * 13.5 / 16);
