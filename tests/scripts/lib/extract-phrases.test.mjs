@@ -52,4 +52,16 @@ describe('extractPhrasesFromHtml', () => {
     expect(result).toContain('delve into');
     expect(result).not.toContain('Delve Into');
   });
+
+  it('skips list items containing a colon', () => {
+    const html = '<ul><li>tools: how to use them</li></ul>';
+    const result = extractPhrasesFromHtml(html);
+    expect(result).toHaveLength(0);
+  });
+
+  it('skips quoted phrases shorter than 5 characters', () => {
+    const html = '<p>avoid "hi"</p>';
+    const result = extractPhrasesFromHtml(html);
+    expect(result).toHaveLength(0);
+  });
 });
