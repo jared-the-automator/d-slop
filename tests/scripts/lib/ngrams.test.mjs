@@ -49,7 +49,7 @@ describe('frequencyDiff', () => {
   it('returns phrases overrepresented in AI corpus', () => {
     const aiText = 'delve into this topic delve into that delve into everything else around here now';
     const humanText = 'the cat sat on the mat and looked at the bird flying by';
-    const result = frequencyDiff([aiText], [humanText], { multiplier: 3, minOccurrences: 2 });
+    const result = frequencyDiff([aiText], [humanText], { multiplier: 2, minOccurrences: 2 });
     expect(result.some(p => p.includes('delve into'))).toBe(true);
   });
 
@@ -65,13 +65,12 @@ describe('frequencyDiff', () => {
   });
 
   it('prefers longer phrases over subsumed shorter ones', () => {
-    const aiText = 'delve into this topic delve into that delve into it'.repeat(5);
-    const humanText = 'walked into the room walked into the hall walked into it'.repeat(5);
+    const aiText = ('delve into this topic delve into that delve into it '.repeat(5)).trim();
+    const humanText = ('walked into the room walked into the hall walked into it '.repeat(5)).trim();
     const result = frequencyDiff([aiText], [humanText], { multiplier: 2, minOccurrences: 3 });
+    const hasDelveIntoThisTopic = result.some(p => p === 'delve into this topic');
+    expect(hasDelveIntoThisTopic).toBe(true);
     const hasDelveInto = result.some(p => p === 'delve into');
-    const hasDelveIntoThis = result.some(p => p === 'delve into this');
-    if (hasDelveIntoThis) {
-      expect(hasDelveInto).toBe(false);
-    }
+    expect(hasDelveInto).toBe(false);
   });
 });

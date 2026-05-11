@@ -22,11 +22,29 @@ export function mergeNgramMaps(maps) {
   return merged;
 }
 
+function normalizeWords(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s'-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 0);
+}
+
+function isSubarray(shorter, longer) {
+  const s = shorter.split(' ');
+  const l = longer.split(' ');
+  if (s.length >= l.length) return false;
+  for (let i = 0; i <= l.length - s.length; i++) {
+    if (s.every((w, j) => w === l[i + j])) return true;
+  }
+  return false;
+}
+
 export function frequencyDiff(aiTexts, humanTexts, { multiplier = 5, minOccurrences = 3 } = {}) {
   if (aiTexts.length === 0 || humanTexts.length === 0) return [];
 
-  const aiTotalWords = aiTexts.join(' ').split(/\s+/).filter(Boolean).length;
-  const humanTotalWords = humanTexts.join(' ').split(/\s+/).filter(Boolean).length;
+  const aiTotalWords = aiTexts.reduce((sum, t) => sum + normalizeWords(t).length, 0);
+  const humanTotalWords = humanTexts.reduce((sum, t) => sum + normalizeWords(t).length, 0);
+  const humanFloor = 1 / (humanTotalWords || 1);
 
   const candidates = [];
 
@@ -38,7 +56,7 @@ export function frequencyDiff(aiTexts, humanTexts, { multiplier = 5, minOccurren
       if (aiCount < minOccurrences) continue;
       const humanCount = humanCombined.get(gram) ?? 0;
       const aiFreq = aiCount / aiTotalWords;
-      const humanFreq = humanCount > 0 ? humanCount / humanTotalWords : 1e-6;
+      const humanFreq = humanCount > 0 ? humanCount / humanTotalWords : humanFloor;
       if (aiFreq / humanFreq >= multiplier) {
         candidates.push(gram);
       }
@@ -49,6 +67,6 @@ export function frequencyDiff(aiTexts, humanTexts, { multiplier = 5, minOccurren
   const unique = [...new Set(candidates)];
   const sorted = unique.sort((a, b) => b.split(' ').length - a.split(' ').length);
   return sorted.filter((phrase, i) =>
-    !sorted.slice(0, i).some(longer => longer.includes(phrase))
+    !sorted.slice(0, i).some(longer => isSubarray(phrase, longer))
   );
 }
