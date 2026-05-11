@@ -19,16 +19,14 @@ export function extractPhrasesFromHtml(html) {
     }
   }
 
-  // Extract from code/pre blocks using regex on cleaned HTML string
-  const cleanedHtml = root.toString();
-  const codeMatches = cleanedHtml.match(/<(?:code|pre)[^>]*>([^<]+)<\/(?:code|pre)>/gi);
-  if (codeMatches) {
-    for (const match of codeMatches) {
-      const text = match.replace(/<[^>]+>/g, '').trim().toLowerCase();
-      const words = text.split(/\s+/).filter(Boolean);
-      if (words.length >= 2 && words.length <= 8) {
-        phrases.add(text);
-      }
+  for (const el of root.querySelectorAll('code, pre')) {
+    // Re-parse the innerHTML to get proper nested structure
+    const innerContent = el.innerHTML;
+    const parsed = parse(innerContent);
+    const text = parsed.text.trim().toLowerCase();
+    const words = text.split(/\s+/).filter(Boolean);
+    if (words.length >= 2 && words.length <= 8) {
+      phrases.add(text);
     }
   }
 
