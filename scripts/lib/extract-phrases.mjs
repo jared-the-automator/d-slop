@@ -19,17 +19,6 @@ export function extractPhrasesFromHtml(html) {
     }
   }
 
-  for (const el of root.querySelectorAll('code, pre')) {
-    // Re-parse the innerHTML to get proper nested structure
-    const innerContent = el.innerHTML;
-    const parsed = parse(innerContent);
-    const text = parsed.text.trim().toLowerCase();
-    const words = text.split(/\s+/).filter(Boolean);
-    if (words.length >= 2 && words.length <= 8) {
-      phrases.add(text);
-    }
-  }
-
   const bodyText = root.text;
   for (const match of bodyText.matchAll(QUOTE_PATTERN)) {
     const phrase = match[1].toLowerCase().trim();

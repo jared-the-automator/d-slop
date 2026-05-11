@@ -17,10 +17,17 @@ const config = readJson('config/discovery.json');
 const aiSourceUrls = readJson('config/ai-sources.json');
 const humanSourceUrls = readJson('config/human-sources.json');
 const existingRules = readJson('rules/rules.json');
-let seenUrls = readJson('config/seen-urls.json');
+let seenUrls = (() => {
+  try { return readJson('config/seen-urls.json'); } catch { return []; }
+})();
 
 const existingPhrases = new Set(existingRules.signals.phraseMatch.phrases);
 const allCandidates = new Map(); // phrase → { source, occurrences }
+
+if (!process.env.BRAVE_SEARCH_API_KEY) {
+  console.error('Error: BRAVE_SEARCH_API_KEY environment variable is not set');
+  process.exit(1);
+}
 
 // Step 1: Web search + meta-article extraction
 console.log('Searching for meta-articles...');

@@ -28,12 +28,6 @@ describe('extractPhrasesFromHtml', () => {
     expect(result).toContain('let us explore');
   });
 
-  it('extracts phrases from code blocks', () => {
-    const html = '<pre><code>leverage synergies</code></pre>';
-    const result = extractPhrasesFromHtml(html);
-    expect(result).toContain('leverage synergies');
-  });
-
   it('ignores content inside nav and footer', () => {
     const html = '<nav><ul><li>home page</li><li>about us</li></ul></nav><footer><p>site copyright notice</p></footer>';
     const result = extractPhrasesFromHtml(html);
