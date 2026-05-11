@@ -37,7 +37,7 @@ async function askClaude(prompt) {
   });
   const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '';
   try {
-    return JSON.parse(text.match(/\{[\s\S]*?\}/)?.[0] ?? '{}');
+    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
   } catch {
     return {};
   }
