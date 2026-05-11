@@ -1,0 +1,52 @@
+name: Validate Phrase Candidates
+
+on:
+  push:
+    paths:
+      - 'candidates/**.json'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run validation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/validate.mjs
+
+      - name: Commit rules update
+        run: |
+          git config user.name "d-slop-bot"
+          git config user.email "bot@d-slop"
+          git add rules/rules.json
+          if git diff --cached --quiet; then
+            echo "No rules changes to commit."
+          else
+            VERSION=$(node -e "const r=require('./rules/rules.json');console.log(r.version)")
+            COUNT=$(node -e "const r=require('./rules/rules.json');console.log(r.signals.phraseMatch.phrases.length)")
+            git commit -m "chore(rules): auto-update to v${VERSION} (${COUNT} phrases) [skip ci]"
+            git push
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Validation Run" >> $GITHUB_STEP_SUMMARY
+          VERSION=$(node -e "const r=require('./rules/rules.json');console.log(r.version)" 2>/dev/null || echo "unknown")
+          COUNT=$(node -e "const r=require('./rules/rules.json');console.log(r.signals.phraseMatch.phrases.length)" 2>/dev/null || echo "unknown")
+          echo "- rules.json version: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- Total phrases: $COUNT" >> $GITHUB_STEP_SUMMARY
