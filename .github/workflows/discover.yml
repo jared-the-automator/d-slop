@@ -1,0 +1,53 @@
+name: Discover Phrase Candidates
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'   # Every Sunday at 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run discovery
+        env:
+          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+        run: node scripts/discover.mjs
+
+      - name: Commit candidates and updated seen-urls
+        run: |
+          git config user.name "d-slop-bot"
+          git config user.email "bot@d-slop"
+          git add candidates/ config/seen-urls.json
+          if git diff --cached --quiet; then
+            echo "No new candidates to commit."
+          else
+            git commit -m "chore(discovery): add candidates $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Discovery Run" >> $GITHUB_STEP_SUMMARY
+          CAND=$(ls candidates/*.json 2>/dev/null | tail -1)
+          if [ -n "$CAND" ]; then
+            COUNT=$(node -e "const f=require('fs');const d=JSON.parse(f.readFileSync('$CAND'));console.log(d.candidates.length)")
+            echo "- Candidates written: $COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "- File: $CAND" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- No candidates file written (0 candidates found)" >> $GITHUB_STEP_SUMMARY
+          fi
