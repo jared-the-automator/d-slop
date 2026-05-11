@@ -1,0 +1,12 @@
+{
+  "searchQueries": [
+    "AI writing patterns phrases to avoid",
+    "ChatGPT phrases overused list",
+    "AI slop words list",
+    "LLM writing tells detect AI content",
+    "how to spot AI generated text phrases"
+  ],
+  "frequencyMultiplier": 5,
+  "minOccurrences": 3,
+  "maxArticlesPerRun": 20
+}
