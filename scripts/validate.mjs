@@ -47,29 +47,40 @@ async function askClaude(prompt) {
   }
 }
 
+function sanitizePhrase(phrase) {
+  return phrase
+    .replace(/[\n\r\t"\\{}]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80);
+}
+
 // Step 1: Validate new candidates
 console.log('\n--- Validating candidates ---');
 const confirmed = [];
 for (const { phrase } of candidates) {
-  process.stdout.write(`  "${phrase}" ... `);
+  const safe = sanitizePhrase(phrase);
+  if (!safe || safe.length < 3) { console.log(`  skipped (too short after sanitize)`); continue; }
+  process.stdout.write(`  "${safe}" ... `);
   const result = await askClaude(
-    `Evaluate this phrase as an AI writing detector signal: "${phrase}"\n\n` +
+    `Evaluate this phrase as an AI writing detector signal: "${safe}"\n\n` +
     `Answer with JSON only: {"aiOverrepresented": true/false, "specificEnough": true/false}\n\n` +
     `- aiOverrepresented: true if this phrase appears in AI-generated content at noticeably higher rates than typical human writing\n` +
     `- specificEnough: true if this phrase is distinctive enough to be useful (not so generic it fires constantly on normal human prose)`
   );
   const passes = result.aiOverrepresented === true && result.specificEnough === true;
   console.log(passes ? '✓ confirmed' : '✗ rejected');
-  if (passes) confirmed.push(phrase);
+  if (passes) confirmed.push(safe);
 }
 
 // Step 2: Staleness review of existing phrases
 console.log('\n--- Reviewing existing phrases for staleness ---');
 const stale = [];
 for (const phrase of currentPhrases) {
-  process.stdout.write(`  "${phrase}" ... `);
+  const safe = sanitizePhrase(phrase);
+  process.stdout.write(`  "${safe}" ... `);
   const result = await askClaude(
-    `Is the phrase "${phrase}" now so common in general human writing that it's no longer a reliable AI detector signal?\n\n` +
+    `Is the phrase "${safe}" now so common in general human writing that it's no longer a reliable AI detector signal?\n\n` +
     `Answer with JSON only: {"stale": true/false}`
   );
   const isStale = result.stale === true;

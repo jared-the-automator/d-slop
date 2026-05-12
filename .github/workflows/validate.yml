@@ -47,12 +47,11 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
         run: |
-          RULES=$(cat rules/rules.json)
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
             "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/rules" \
             -H "Authorization: Bearer ${CF_API_TOKEN}" \
             -H "Content-Type: application/json" \
-            --data-raw "$RULES")
+            --data-binary @rules/rules.json)
           if [ "$STATUS" != "200" ]; then
             echo "KV push failed with HTTP $STATUS"
             exit 1
