@@ -36,18 +36,18 @@ Rules are served from a private Cloudflare endpoint, not the public repo, so the
 
 ## Install
 
-### Chrome Web Store
+### Chrome / Vivaldi / Brave / Edge
 
-_Coming soon._
+1. Download `d-slop-chrome-vX.X.X.zip` from the [latest release](https://github.com/jared-the-automator/d-slop/releases/latest) and unzip it
+2. Go to your browser's extensions page (e.g. `chrome://extensions`)
+3. Enable Developer mode (top right toggle)
+4. Click "Load unpacked" and select the unzipped folder
 
-### Manual (developer mode)
+### Firefox
 
-1. Download the latest release zip from the [Releases](https://github.com/jared-the-automator/d-slop/releases) page and unzip it, or clone and build (see below)
-2. Go to `chrome://extensions`
-3. Enable Developer mode (top right)
-4. Click "Load unpacked" and select the `.output/chrome-mv3/` folder
-
-Firefox users: use `npm run build:firefox` and load `.output/firefox-mv2/`.
+1. Download `d-slop-firefox-vX.X.X.zip` from the [latest release](https://github.com/jared-the-automator/d-slop/releases/latest)
+2. Go to `about:debugging#/runtime/this-firefox`
+3. Click "Load Temporary Add-on" and select the zip
 
 ---
 
