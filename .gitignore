@@ -4,3 +4,4 @@ dist/
 .wxt/
 *.log
 rules/rules.json
+cloudflare/.wrangler/
