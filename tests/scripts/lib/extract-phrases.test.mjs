@@ -58,4 +58,14 @@ describe('extractPhrasesFromHtml', () => {
     const result = extractPhrasesFromHtml(html);
     expect(result).toHaveLength(0);
   });
+
+  it('does not split on curly apostrophes as quote delimiters', () => {
+    // ’ = RIGHT SINGLE QUOTATION MARK (same codepoint as curly apostrophe)
+    // “/” = LEFT/RIGHT DOUBLE QUOTATION MARK
+    const html = "<p>Don’t use “in conclusion” or “to summarize”.</p>";
+    const result = extractPhrasesFromHtml(html);
+    expect(result).toContain('in conclusion');
+    expect(result).toContain('to summarize');
+    expect(result.find(p => p.startsWith('t use'))).toBeUndefined();
+  });
 });
