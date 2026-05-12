@@ -23,24 +23,42 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Fetch current rules from KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+        run: |
+          mkdir -p rules
+          curl -sf \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/rules" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -o rules/rules.json
+          echo "Fetched rules v$(node -e "const r=require('./rules/rules.json');console.log(r.version)")"
+
       - name: Run validation
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/validate.mjs
 
-      - name: Commit rules update
+      - name: Push rules to Cloudflare KV
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
         run: |
-          git config user.name "d-slop-bot"
-          git config user.email "bot@d-slop"
-          git add rules/rules.json
-          if git diff --cached --quiet; then
-            echo "No rules changes to commit."
-          else
-            VERSION=$(node -e "const r=require('./rules/rules.json');console.log(r.version)")
-            COUNT=$(node -e "const r=require('./rules/rules.json');console.log(r.signals.phraseMatch.phrases.length)")
-            git commit -m "chore(rules): auto-update to v${VERSION} (${COUNT} phrases) [skip ci]"
-            git push
+          RULES=$(cat rules/rules.json)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/rules" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data-raw "$RULES")
+          if [ "$STATUS" != "200" ]; then
+            echo "KV push failed with HTTP $STATUS"
+            exit 1
           fi
+          VERSION=$(node -e "const r=require('./rules/rules.json');console.log(r.version)")
+          echo "Pushed rules v${VERSION} to Cloudflare KV"
 
       - name: Summary
         if: always()

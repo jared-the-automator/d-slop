@@ -1,0 +1,8 @@
+name = "d-slop-rules"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+account_id = "e56af08485995df353b16c1152372e57"
+
+[[kv_namespaces]]
+binding = "RULES"
+id = "49eb5643d2c84162b77a5c28c2ebf10c"

@@ -3,3 +3,4 @@ node_modules/
 dist/
 .wxt/
 *.log
+rules/rules.json
