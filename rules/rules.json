@@ -3,7 +3,7 @@
   "threshold": 0.20,
   "signals": {
     "phraseMatch": {
-      "weight": 0.40,
+      "weight": 0.30,
       "phrases": [
         "delve into",
         "it's worth noting",
@@ -60,7 +60,7 @@
       ]
     },
     "burstiness": {
-      "weight": 0.25,
+      "weight": 0.35,
       "uniformityThreshold": 0.35
     },
     "punctuationDensity": {
