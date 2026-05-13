@@ -2,7 +2,7 @@
 
 A browser extension that detects AI-generated content and gets out of your way.
 
-Flags suspicious text, collapses it behind a click, or blocks the whole page until you decide you want to see it. Detects AI-generated images, video, and audio using C2PA provenance metadata. The phrase list updates automatically — no manual maintenance required.
+It flags suspicious text, collapses it behind a click, or blocks the whole page until you decide you want to see it. Media detection is built in too: images, video, and audio are checked against C2PA provenance metadata, the open standard that major AI generators embed in their output. The phrase list refreshes automatically in the background, so there's nothing to maintain.
 
 ---
 
@@ -24,7 +24,7 @@ Any block scoring above your threshold gets flagged.
 
 D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata — the Content Authenticity Initiative standard that major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) embed in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and, when available, the name of the generating tool.
 
-Detection happens in the background service worker to avoid CORS restrictions. Only the first 200KB of each media file is fetched. Lazily-loaded images and videos are caught via a MutationObserver.
+Scans run in the background to avoid browser CORS restrictions, checking only the first 200KB of each file to keep things fast. Images and videos that load lazily are caught as they appear.
 
 ## Modes
 
