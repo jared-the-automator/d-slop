@@ -2,11 +2,13 @@
 
 A browser extension that detects AI-generated content and gets out of your way.
 
-Highlight suspicious blocks, collapse them behind a click, or block the whole page until you decide you want to see it. The phrase list updates automatically — no manual maintenance required.
+Flags suspicious text, collapses it behind a click, or blocks the whole page until you decide you want to see it. Detects AI-generated images, video, and audio using C2PA provenance metadata. The phrase list updates automatically — no manual maintenance required.
 
 ---
 
 ## How it works
+
+### Text detection
 
 D-slop scores each block of text on your page using five signals:
 
@@ -16,15 +18,21 @@ D-slop scores each block of text on your page using five signals:
 - **List uniformity** — AI bullet points are eerily even in length
 - **Conclusion markers** — formulaic closings like "in conclusion" and "to summarize"
 
-Any block scoring above the threshold gets flagged. You choose what happens next.
+Any block scoring above your threshold gets flagged.
+
+### Media detection
+
+D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata — the Content Authenticity Initiative standard that major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) embed in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and, when available, the name of the generating tool.
+
+Detection happens in the background service worker to avoid CORS restrictions. Only the first 200KB of each media file is fetched. Lazily-loaded images and videos are caught via a MutationObserver.
 
 ## Modes
 
-- **Highlight** — flags get an orange outline and a score badge
-- **Collapse** — flagged blocks fold into a `<details>` element; click to reveal
-- **Hidden** — a full-page overlay appears with a 3-second countdown before navigating back; a "Show anyway" button lets you override
+Text and media each have independent mode and threshold controls in the popup.
 
-The threshold and mode are adjustable from the popup.
+- **Highlight** — flagged content gets an orange outline and a badge ("AI ~72%" for text, "C2PA: Adobe Firefly" for media)
+- **Collapse** — flagged content is hidden behind a placeholder with a "Show anyway" button
+- **Hidden** — a full-page overlay appears with a 3-second countdown before navigating back; a "Show anyway" button lets you override
 
 ## Automatic phrase updates
 
@@ -79,7 +87,7 @@ npm run dev
 
 ## Privacy
 
-D-slop has no telemetry, no accounts, and no data collection. It reads the text already on your screen. The only outbound request it makes is a periodic fetch of the rules file from Cloudflare — about 5KB, once per 24 hours.
+D-slop has no telemetry, no accounts, and no data collection. It reads the text and media already on your screen. The only outbound requests it makes are a periodic fetch of the rules file from Cloudflare (about 5KB, once per 24 hours) and partial media fetches for C2PA scanning (first 200KB of each media element, only while detection is enabled).
 
 ---
 
