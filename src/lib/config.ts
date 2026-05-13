@@ -10,3 +10,9 @@ export const MODE_KEY = 'mode';
 export const FLAG_COUNT_KEY = 'flagCount';
 export const USER_THRESHOLD_KEY = 'userThreshold';
 export const DEFAULT_THRESHOLD = 0.20;
+
+export const MEDIA_MODE_KEY = 'mediaMode';
+export const MEDIA_THRESHOLD_KEY = 'mediaThreshold';
+export const TIER_KEY = 'tier';
+export const DEFAULT_MEDIA_THRESHOLD = 0.5;
+export const DEFAULT_MEDIA_MODE: 'highlight' | 'collapse' | 'hidden' = 'highlight';
