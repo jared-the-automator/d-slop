@@ -22,7 +22,7 @@ Any block scoring above your threshold gets flagged.
 
 ### Media detection
 
-D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata — the Content Authenticity Initiative standard that major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) embed in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and, when available, the name of the generating tool.
+D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata, the Content Authenticity Initiative standard embedded by major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and, when available, the name of the generating tool.
 
 Scans run in the background to avoid browser CORS restrictions, checking only the first 200KB of each file to keep things fast. Images and videos that load lazily are caught as they appear.
 
@@ -36,7 +36,7 @@ Text and media each have independent mode and threshold controls in the popup.
 
 ## Automatic phrase updates
 
-The phrase list is maintained by a weekly GitHub Actions pipeline. It searches for new AI-writing-pattern articles, scrapes a corpus of known-AI and known-human content, runs frequency differential analysis, and passes candidates through a Claude validation gate before anything gets added. Stale phrases are pruned the same way. Updates reach your browser within 24 hours of each run — no reinstall needed.
+The phrase list is maintained by a weekly GitHub Actions pipeline. It searches for new AI-writing-pattern articles, scrapes a corpus of known-AI and known-human content, runs frequency differential analysis, and passes candidates through a Claude validation gate before anything gets added. Stale phrases are pruned the same way. Updates reach your browser within 24 hours of each run.
 
 Rules are served from a private Cloudflare endpoint, not the public repo, so the phrase list isn't trivially reverse-engineerable.
 
@@ -93,7 +93,7 @@ D-slop has no telemetry, no accounts, and no data collection. It reads the text 
 
 ## Contributing
 
-Bug reports and phrase suggestions are welcome via [GitHub Issues](https://github.com/jared-the-automator/d-slop/issues). The automated pipeline handles phrase maintenance, so manual phrase PRs are unlikely to be merged — but if you've found a whole category the detector misses, open an issue and describe it.
+Bug reports and phrase suggestions are welcome via [GitHub Issues](https://github.com/jared-the-automator/d-slop/issues). The automated pipeline handles phrase maintenance, so manual phrase PRs are unlikely to be merged, but if you've found a whole category the detector misses, open an issue and describe it.
 
 ---
 
