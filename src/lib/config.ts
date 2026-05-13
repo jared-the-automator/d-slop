@@ -14,5 +14,6 @@ export const DEFAULT_THRESHOLD = 0.20;
 export const MEDIA_MODE_KEY = 'mediaMode';
 export const MEDIA_THRESHOLD_KEY = 'mediaThreshold';
 export const TIER_KEY = 'tier';
+// Reserved for D-slop+ API providers; C2PA detection is binary (no confidence score)
 export const DEFAULT_MEDIA_THRESHOLD = 0.5;
 export const DEFAULT_MEDIA_MODE: 'highlight' | 'collapse' | 'hidden' = 'highlight';

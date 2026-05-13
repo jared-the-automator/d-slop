@@ -13,6 +13,6 @@ export function getMediaElements(): Element[] {
     .filter(el => !el.hasAttribute(MEDIA_SCANNED_ATTR))
     .filter(el => {
       const src = el.getAttribute('src') ?? '';
-      return src.length > 0 && !src.startsWith('data:');
+      return src.length > 0 && !src.startsWith('data:') && !src.startsWith('blob:');
     });
 }

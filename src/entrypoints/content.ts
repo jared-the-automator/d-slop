@@ -145,6 +145,8 @@ export default defineContentScript({
     let tabFlagCount = 0;
 
     async function runMediaScan(): Promise<number> {
+      const state = await getExtensionState();
+      if (!state.enabled) return 0;
       const mediaSettings = await getMediaSettings();
       const elements = getMediaElements();
       let count = 0;
