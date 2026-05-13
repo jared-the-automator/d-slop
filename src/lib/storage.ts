@@ -73,3 +73,7 @@ export async function getTier(): Promise<'free' | 'plus'> {
   const result = await chrome.storage.local.get([TIER_KEY]);
   return (result[TIER_KEY] as 'free' | 'plus') ?? 'free';
 }
+
+export async function setTier(tier: 'free' | 'plus'): Promise<void> {
+  await chrome.storage.local.set({ [TIER_KEY]: tier });
+}
