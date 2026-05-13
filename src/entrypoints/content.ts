@@ -1,6 +1,9 @@
-import { getExtensionState, getCachedRules, setFlagCount, getUserThreshold } from '../lib/storage';
+import { getExtensionState, getCachedRules, setFlagCount, getUserThreshold, getMediaSettings } from '../lib/storage';
 import { score } from '../lib/rules-engine/scorer';
 import type { DisplayMode, TextScore } from '../lib/rules-engine/types';
+import { getMediaElements, MEDIA_SCANNED_ATTR } from '../lib/media-detector/scanner';
+import { applyMediaMode } from '../lib/media-detector/renderer';
+import type { MediaDetectionResult } from '../lib/media-detector/types';
 
 const SCORED_ATTR = 'data-dslop-scored';
 const BADGE_CLASS = 'dslop-badge';
@@ -141,18 +144,44 @@ export default defineContentScript({
   async main() {
     let tabFlagCount = 0;
 
+    async function runMediaScan(): Promise<number> {
+      const mediaSettings = await getMediaSettings();
+      const elements = getMediaElements();
+      let count = 0;
+
+      for (const el of elements) {
+        el.setAttribute(MEDIA_SCANNED_ATTR, '1');
+        const src = el.getAttribute('src');
+        if (!src) continue;
+
+        let result: MediaDetectionResult;
+        try {
+          result = await browser.runtime.sendMessage({ type: 'SCAN_MEDIA', url: src });
+        } catch {
+          continue;
+        }
+
+        if (!result?.detected) continue;
+        count++;
+        if (mediaSettings.mode !== 'hidden') {
+          applyMediaMode(el, result, mediaSettings.mode);
+        }
+      }
+
+      return count;
+    }
+
     async function run() {
       const [state, rules, userThreshold] = await Promise.all([
         getExtensionState(),
         getCachedRules(),
         getUserThreshold(),
       ]);
-      const effectiveRules = { ...rules, threshold: userThreshold };
-
       if (!state.enabled) return;
 
+      const effectiveRules = { ...rules, threshold: userThreshold };
       const blocks = getTextBlocks();
-      let flagCount = 0;
+      let textFlagCount = 0;
 
       for (const block of blocks) {
         block.setAttribute(SCORED_ATTR, '1');
@@ -160,9 +189,12 @@ export default defineContentScript({
         const textScore = score(text, effectiveRules);
         if (textScore.flagged) {
           if (state.mode !== 'hidden') applyMode(block, textScore, state.mode);
-          flagCount++;
+          textFlagCount++;
         }
       }
+
+      const mediaFlagCount = await runMediaScan();
+      const flagCount = textFlagCount + mediaFlagCount;
 
       await setFlagCount(flagCount);
       tabFlagCount = flagCount;
@@ -173,6 +205,9 @@ export default defineContentScript({
     }
 
     await run();
+
+    const observer = new MutationObserver(() => { runMediaScan(); });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       if (msg?.type === 'GET_FLAG_COUNT') {
