@@ -23,6 +23,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@wxt-dev/module-react": "^1.0.0",
+    "jsdom": "^29.1.1",
     "playwright": "^1.59.1",
     "typescript": "^5.0.0",
     "vitest": "^4.1.6",
