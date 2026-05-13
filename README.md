@@ -22,7 +22,7 @@ Any block scoring above your threshold gets flagged.
 
 ### Media detection
 
-D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata, the Content Authenticity Initiative standard embedded by major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and, when available, the name of the generating tool.
+D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata, the Content Authenticity Initiative standard embedded by major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and handled according to Modes, below.
 
 Scans run in the background to avoid browser CORS restrictions, checking only the first 200KB of each file to keep things fast. Images and videos that load lazily are caught as they appear.
 
