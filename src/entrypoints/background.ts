@@ -1,6 +1,8 @@
 import { RULES_URL, RULES_FETCH_INTERVAL_MS, RULES_LAST_FETCHED_KEY } from '../lib/config';
 import { setCachedRules } from '../lib/storage';
 import type { Rules } from '../lib/rules-engine/types';
+import { scanForC2PA } from '../lib/media-detector/c2pa';
+import type { MediaDetectionResult } from '../lib/media-detector/types';
 
 async function fetchAndCacheRules(): Promise<void> {
   try {
@@ -34,4 +36,21 @@ async function maybeRefreshRules(): Promise<void> {
 export default defineBackground(() => {
   chrome.runtime.onInstalled.addListener(() => fetchAndCacheRules());
   chrome.runtime.onStartup.addListener(() => maybeRefreshRules());
+
+  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg?.type !== 'SCAN_MEDIA') return;
+    const url: string = msg.url;
+    fetch(url, {
+      headers: { Range: 'bytes=0-204799' },
+      signal: AbortSignal.timeout(5000),
+    })
+      .then(res => {
+        if (!res.ok) return sendResponse({ detected: false } as MediaDetectionResult);
+        return res.arrayBuffer().then(buf => {
+          sendResponse(scanForC2PA(new Uint8Array(buf)));
+        });
+      })
+      .catch(() => sendResponse({ detected: false } as MediaDetectionResult));
+    return true; // keep message channel open for async sendResponse
+  });
 });
