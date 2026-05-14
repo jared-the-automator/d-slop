@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   getExtensionState, setExtensionState,
   getUserThreshold, setUserThreshold,
-  getMediaSettings, setMediaSettings, getTier,
+  getMediaSettings, setMediaSettings,
 } from '../../lib/storage';
 import { DEFAULT_THRESHOLD, DEFAULT_MEDIA_THRESHOLD } from '../../lib/config';
 import type { DisplayMode, ExtensionState } from '../../lib/rules-engine/types';
@@ -27,13 +27,10 @@ export default function App() {
     mode: 'highlight',
     threshold: DEFAULT_MEDIA_THRESHOLD,
   });
-  const [tier, setTier] = useState<'free' | 'plus'>('free');
-
   useEffect(() => {
     getExtensionState().then(setState);
     getUserThreshold().then(setThreshold);
     getMediaSettings().then(setMediaSettingsLocal);
-    getTier().then(setTier);
     browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
       if (!tab?.id) return;
       browser.tabs.sendMessage(tab.id, { type: 'GET_FLAG_COUNT' })
@@ -140,9 +137,6 @@ export default function App() {
         />
         <p style={{ fontSize: 10, color: '#888', margin: '5px 0 0 0' }}>
           C2PA scanning active
-          {tier === 'free' && (
-            <span style={{ marginLeft: 6, color: '#9b59b6' }}>· D-slop+</span>
-          )}
         </p>
       </fieldset>
 
