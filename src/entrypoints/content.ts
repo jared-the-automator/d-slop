@@ -153,7 +153,7 @@ export default defineContentScript({
 
       for (const el of elements) {
         el.setAttribute(MEDIA_SCANNED_ATTR, '1');
-        const src = el.getAttribute('src');
+        const src = (el as HTMLImageElement).src || el.getAttribute('src');
         if (!src) continue;
 
         let result: MediaDetectionResult;
