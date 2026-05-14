@@ -3,5 +3,7 @@ node_modules/
 dist/
 .wxt/
 *.log
+*.zip
 rules/rules.json
 cloudflare/.wrangler/
+test-results/
