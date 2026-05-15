@@ -7,3 +7,5 @@ dist/
 rules/rules.json
 cloudflare/.wrangler/
 test-results/
+.env
+.env.*
