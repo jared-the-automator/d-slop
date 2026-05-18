@@ -2,7 +2,7 @@
 
 A browser extension that detects AI-generated content and gets out of your way.
 
-It flags suspicious text, collapses it behind a click, or blocks the whole page until you decide you want to see it. Media detection is built in too: images, video, and audio are checked against C2PA provenance metadata, the open standard that major AI generators embed in their output. The phrase list refreshes automatically in the background, so there's nothing to maintain.
+It flags suspicious text, collapses it behind a click, or blocks the whole page until you decide you want to see it. Images, video, and audio are checked for C2PA provenance metadata, the open standard that AI generators can embed in their output to declare a file's origin. The phrase list refreshes automatically in the background, so there's nothing to maintain.
 
 ---
 
@@ -12,31 +12,33 @@ It flags suspicious text, collapses it behind a click, or blocks the whole page 
 
 D-slop scores each block of text on your page using five signals:
 
-- **Phrase matching** — a curated list of phrases that appear disproportionately in AI writing ("delve into", "it's worth noting", "moving forward", and about 50 others)
-- **Burstiness** — AI tends to write sentences of nearly identical length; human writing varies
-- **Punctuation density** — consistent over- or under-punctuation is a tell
-- **List uniformity** — AI bullet points are eerily even in length
-- **Conclusion markers** — formulaic closings like "in conclusion" and "to summarize"
+- **Phrase matching**: a curated list of phrases that appear disproportionately in AI writing ("delve into", "it's worth noting", "moving forward", and about 50 others)
+- **Burstiness**: AI tends to write sentences of nearly identical length; human writing varies
+- **Punctuation density**: consistent over- or under-punctuation is a tell
+- **List uniformity**: AI bullet points are eerily even in length
+- **Conclusion markers**: formulaic closings like "in conclusion" and "to summarize"
 
 Any block scoring above your threshold gets flagged.
 
 ### Media detection
 
-D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata, the Content Authenticity Initiative standard embedded by major AI image generators (Adobe Firefly, DALL-E, Midjourney, Stable Diffusion, Bing Image Creator, Microsoft Designer) in their output. If a valid AI-provenance manifest is found, the element is flagged with the detection method and handled according to Modes, below.
+D-slop scans images, video, and audio for [C2PA](https://c2pa.org/) provenance metadata, the Content Authenticity Initiative standard that AI image generators can embed in their output. When a valid manifest is found, the element is flagged. If the file includes the name of the generating tool, that appears in the badge.
 
-Scans run in the background to avoid browser CORS restrictions, checking only the first 200KB of each file to keep things fast. Images and videos that load lazily are caught as they appear.
+Coverage depends on whether the metadata reaches your browser intact. Most social platforms strip image metadata when files are uploaded, so C2PA detection does not work on content served through LinkedIn, Twitter, Facebook, or similar CDNs. It works reliably on directly-hosted images where the original file is served unchanged, which includes many news sites, blogs, and image hosting services. Coverage will grow as more platforms choose to preserve provenance data.
+
+Scans run in the background to avoid browser CORS restrictions, checking only the first 200KB of each file. Images and videos that load lazily are caught as they appear.
 
 ## Modes
 
 Text and media each have independent mode and threshold controls in the popup.
 
-- **Highlight** — flagged content gets an orange outline and a badge ("AI ~72%" for text, "C2PA: Adobe Firefly" for media)
-- **Collapse** — flagged content is hidden behind a placeholder with a "Show anyway" button
-- **Hidden** — a full-page overlay appears with a 3-second countdown before navigating back; a "Show anyway" button lets you override
+- **Highlight**: flagged content gets an orange outline and a badge ("AI ~72%" for text, "C2PA: AI-generated" for media)
+- **Collapse**: flagged content is hidden behind a placeholder with a "Show anyway" button
+- **Hidden**: a full-page overlay appears with a 3-second countdown before navigating back; a "Show anyway" button lets you override
 
 ## Automatic phrase updates
 
-The phrase list is maintained by a weekly GitHub Actions pipeline. It searches for new AI-writing-pattern articles, scrapes a corpus of known-AI and known-human content, runs frequency differential analysis, and passes candidates through a Claude validation gate before anything gets added. Stale phrases are pruned the same way. Updates reach your browser within 24 hours of each run.
+The phrase list is maintained by a weekly GitHub Actions pipeline. It searches for new AI-writing-pattern articles, scrapes a corpus of known-AI and known-human content, runs frequency differential analysis, and passes candidates through a validation gate before anything gets added. Stale phrases are pruned the same way. Updates reach your browser within 24 hours of each run.
 
 Rules are served from a private Cloudflare endpoint, not the public repo, so the phrase list isn't trivially reverse-engineerable.
 
@@ -67,7 +69,7 @@ Requires Node.js >= 20.
 git clone https://github.com/jared-the-automator/d-slop.git
 cd d-slop
 npm install
-npm run build        # Chrome
+npm run build          # Chrome
 npm run build:firefox  # Firefox
 ```
 
