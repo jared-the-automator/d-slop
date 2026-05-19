@@ -6,7 +6,7 @@ export default defineConfig({
   manifest: {
     name: 'D-slop',
     description: 'Highlights or hides AI-generated content on web pages.',
-    version: '0.2.0',
+    version: '0.2.1',
     permissions: ['storage', 'tabs'],
     host_permissions: ['https://raw.githubusercontent.com/*', '<all_urls>'],
     icons: {
