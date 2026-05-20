@@ -10,11 +10,12 @@ const readJson = p => JSON.parse(readFileSync(resolve(ROOT, p), 'utf8'));
 const writeJson = (p, data) =>
   writeFileSync(resolve(ROOT, p), JSON.stringify(data, null, 2) + '\n');
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 if (!process.env.ANTHROPIC_API_KEY) {
   console.error('Error: ANTHROPIC_API_KEY environment variable is not set');
   process.exit(1);
 }
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // Find latest candidates file
 const candidateFiles = readdirSync(resolve(ROOT, 'candidates'))
@@ -33,17 +34,17 @@ console.log(`Validating ${candidates.length} candidates from ${candidateFiles[0]
 const rules = readJson('rules/rules.json');
 const currentPhrases = [...rules.signals.phraseMatch.phrases];
 
-async function askClaude(prompt) {
+async function askClaude(prompt, maxTokens = 2048) {
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 150,
+    max_tokens: maxTokens,
     messages: [{ role: 'user', content: prompt }],
   });
   const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '';
   try {
-    return JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+    return JSON.parse(text.match(/\[[\s\S]*\]|\{[\s\S]*\}/)?.[0] ?? '[]');
   } catch {
-    return {};
+    return [];
   }
 }
 
@@ -55,37 +56,56 @@ function sanitizePhrase(phrase) {
     .slice(0, 80);
 }
 
-// Step 1: Validate new candidates
-console.log('\n--- Validating candidates ---');
+// Step 1: Validate all candidates in a single batch call
+console.log('\n--- Validating candidates (batch) ---');
+const sanitizedCandidates = candidates
+  .map(({ phrase }) => sanitizePhrase(phrase))
+  .filter(p => p && p.length >= 3);
+
 const confirmed = [];
-for (const { phrase } of candidates) {
-  const safe = sanitizePhrase(phrase);
-  if (!safe || safe.length < 3) { console.log(`  skipped (too short after sanitize)`); continue; }
-  process.stdout.write(`  "${safe}" ... `);
-  const result = await askClaude(
-    `Evaluate this phrase as an AI writing detector signal: "${safe}"\n\n` +
-    `Answer with JSON only: {"aiOverrepresented": true/false, "specificEnough": true/false}\n\n` +
+if (sanitizedCandidates.length > 0) {
+  const candidateList = sanitizedCandidates.map((p, i) => `${i}: ${p}`).join('\n');
+  const results = await askClaude(
+    `Evaluate each phrase below as an AI writing detector signal.\n\n` +
+    `For each phrase, determine:\n` +
     `- aiOverrepresented: true if this phrase appears in AI-generated content at noticeably higher rates than typical human writing\n` +
-    `- specificEnough: true if this phrase is distinctive enough to be useful (not so generic it fires constantly on normal human prose)`
+    `- specificEnough: true if this phrase is distinctive enough to be useful (not so generic it fires constantly on normal human prose)\n\n` +
+    `Phrases:\n${candidateList}\n\n` +
+    `Return a JSON array with one object per phrase in the same order:\n` +
+    `[{"aiOverrepresented": true/false, "specificEnough": true/false}, ...]`
   );
-  const passes = result.aiOverrepresented === true && result.specificEnough === true;
-  console.log(passes ? '✓ confirmed' : '✗ rejected');
-  if (passes) confirmed.push(safe);
+
+  const resultArray = Array.isArray(results) ? results : [];
+  sanitizedCandidates.forEach((phrase, i) => {
+    const r = resultArray[i] ?? {};
+    const passes = r.aiOverrepresented === true && r.specificEnough === true;
+    console.log(`  "${phrase}" ... ${passes ? '✓ confirmed' : '✗ rejected'}`);
+    if (passes) confirmed.push(phrase);
+  });
+} else {
+  console.log('  No valid candidates to evaluate.');
 }
 
-// Step 2: Staleness review of existing phrases
-console.log('\n--- Reviewing existing phrases for staleness ---');
+// Step 2: Staleness review of all existing phrases in a single batch call
+console.log('\n--- Reviewing existing phrases for staleness (batch) ---');
 const stale = [];
-for (const phrase of currentPhrases) {
-  const safe = sanitizePhrase(phrase);
-  process.stdout.write(`  "${safe}" ... `);
-  const result = await askClaude(
-    `Is the phrase "${safe}" now so common in general human writing that it's no longer a reliable AI detector signal?\n\n` +
-    `Answer with JSON only: {"stale": true/false}`
+if (currentPhrases.length > 0) {
+  const phraseList = currentPhrases.map((p, i) => `${i}: ${sanitizePhrase(p)}`).join('\n');
+  const stalenessResults = await askClaude(
+    `Review each phrase below for staleness as an AI writing detector signal.\n\n` +
+    `A phrase is stale if it has become so common in general human writing that it's no longer a reliable AI indicator.\n\n` +
+    `Phrases:\n${phraseList}\n\n` +
+    `Return a JSON array with one object per phrase in the same order:\n` +
+    `[{"stale": true/false}, ...]`
   );
-  const isStale = result.stale === true;
-  console.log(isStale ? 'stale' : 'ok');
-  if (isStale) stale.push(phrase);
+
+  const stalenessArray = Array.isArray(stalenessResults) ? stalenessResults : [];
+  currentPhrases.forEach((phrase, i) => {
+    const r = stalenessArray[i] ?? {};
+    const isStale = r.stale === true;
+    console.log(`  "${sanitizePhrase(phrase)}" ... ${isStale ? 'stale' : 'ok'}`);
+    if (isStale) stale.push(phrase);
+  });
 }
 
 // Step 3: Apply changes
