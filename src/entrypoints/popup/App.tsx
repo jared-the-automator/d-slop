@@ -94,11 +94,11 @@ export default function App() {
           </label>
         ))}
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#aaa', marginTop: 6, marginBottom: 2 }}>
-          <span>sensitive</span>
+          <span>aggressive</span>
           <span style={{ color: '#555', fontWeight: threshold === DEFAULT_THRESHOLD ? 'bold' : 'normal' }}>
             {Math.round(threshold * 100)}%{threshold === DEFAULT_THRESHOLD ? ' (default)' : ''}
           </span>
-          <span>strict</span>
+          <span>cautious</span>
         </div>
         <input
           type="range" min="0.05" max="0.50" step="0.05"
@@ -123,11 +123,11 @@ export default function App() {
           </label>
         ))}
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#aaa', marginTop: 6, marginBottom: 2 }}>
-          <span>sensitive</span>
+          <span>aggressive</span>
           <span style={{ color: '#555', fontWeight: mediaSettings.threshold === DEFAULT_MEDIA_THRESHOLD ? 'bold' : 'normal' }}>
             {Math.round(mediaSettings.threshold * 100)}%{mediaSettings.threshold === DEFAULT_MEDIA_THRESHOLD ? ' (default)' : ''}
           </span>
-          <span>strict</span>
+          <span>cautious</span>
         </div>
         <input
           type="range" min="0.05" max="1.00" step="0.05"
