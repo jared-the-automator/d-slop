@@ -16,7 +16,9 @@ const writeJson = (p, data) =>
 const config = readJson('config/discovery.json');
 const aiSourceUrls = readJson('config/ai-sources.json');
 const humanSourceUrls = readJson('config/human-sources.json');
-const existingRules = readJson('rules/rules.json');
+const existingRules = (() => {
+  try { return readJson('rules/rules.json'); } catch { return { signals: { phraseMatch: { phrases: [] } } }; }
+})();
 let seenUrls = (() => {
   try { return readJson('config/seen-urls.json'); } catch { return []; }
 })();
