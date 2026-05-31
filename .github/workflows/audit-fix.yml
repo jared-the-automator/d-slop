@@ -1,0 +1,50 @@
+name: Audit Fix
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  audit-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run audit fix
+        run: npm audit fix || true
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet package.json package-lock.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Open PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: audit-fix/automated
+          commit-message: 'fix: npm audit fix'
+          title: 'fix: patch npm audit vulnerabilities'
+          body: |
+            Automated `npm audit fix` run. Review the diff before merging.
+
+            Unfixable vulnerabilities (no upstream patch available) will not appear here.
+          labels: security
