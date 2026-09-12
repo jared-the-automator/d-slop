@@ -28,7 +28,7 @@
     "typescript": "^5.0.0",
     "vitest": "^4.1.11",
     "wrangler": "^4.131.1",
-    "wxt": "^0.20.0"
+    "wxt": "^0.21.4"
   },
   "overrides": {
     "shell-quote": "1.10.0"
