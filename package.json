@@ -29,5 +29,8 @@
     "vitest": "^4.1.6",
     "wrangler": "^4.90.1",
     "wxt": "^0.20.0"
+  },
+  "overrides": {
+    "shell-quote": "1.10.0"
   }
 }
